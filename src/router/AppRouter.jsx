@@ -3,11 +3,13 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import Dashboard from "../pages/Dashboard";
 import Books from "../pages/Books";
 import Members from "../pages/Members";
-import IssueBooks from "../pages/IssueBooks";
+import BooksIssue from "../pages/BooksIssue";
+import IssueBook from "../components/IssueBook";
 import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
 import ProtectedRoute from "../components/ProtectedRoute";
 import PublicRoute from "../components/PublicRoute";
+import Fines from "../pages/Fines";
 
 const AppRouter = () => {
   return (
@@ -34,7 +36,9 @@ const AppRouter = () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="/books" element={<Books />} />
           <Route path="/members" element={<Members />} />
-          <Route path="/issue" element={<IssueBooks />} />
+          <Route path="/issue" element={<BooksIssue />} />
+          <Route path="/issue-Book" element={<IssueBook />} />
+          <Route path="/fines" element={<Fines />} />
         </Route>
 
         {/* Redirect root to login if not logged in */}

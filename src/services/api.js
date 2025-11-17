@@ -19,4 +19,23 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// 🚨 Handle Unauthorized (401)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      console.warn("⚠️ Unauthorized Access — Logging out...");
+
+      // Clear user data and token
+      localStorage.removeItem("token");
+      localStorage.removeItem("user"); // if you store user info
+
+      // Redirect to login page
+      window.location.href = "/login"; // or your route path
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export default api;

@@ -12,6 +12,7 @@ const Books = () => {
     author: "",
     publisher: "",
   });
+  const [debouncedFilters, setDebouncedFilters] = useState(filters);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -19,10 +20,20 @@ const Books = () => {
   const [limit, setLimit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
 
+   // 🔁 Debounce filters — wait 300ms after last change
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedFilters(filters);
+      setPage(1); 
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [filters]);
+
   const loadBooks = async () => {
     setLoading(true);
     try {
-      const res = await getBooks({ ...filters, page, limit });
+      const res = await getBooks({ ...debouncedFilters, page, limit });
       setBooks(res?.resources?.data || []);
       setTotalPages(res?.resources?.pagination?.total_pages || 1);
     } catch (err) {
@@ -34,7 +45,7 @@ const Books = () => {
 
   useEffect(() => {
     loadBooks();
-  }, [filters, page, limit]);
+  }, [debouncedFilters, page, limit]);
 
   return (
     <div className="p-6 space-y-6">
@@ -86,7 +97,7 @@ const Books = () => {
         <p className="text-center text-gray-600 mt-10">Loading books...</p>
       ) : books.length > 0 ? (
         <>
-          <BookCards books={books} />
+          <BookCards books={books} onBookUpdated={loadBooks} />
           <Pagination
             currentPage={page}
             totalPages={totalPages}

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { FaHome, FaBook, FaUsers, FaClipboard } from "react-icons/fa";
+import { FaHome, FaBook, FaUsers, FaClipboard, FaMoneyBill } from "react-icons/fa";
 
 const Sidebar = ({ isOpen }) => {
   const { pathname } = useLocation();
@@ -10,6 +10,7 @@ const Sidebar = ({ isOpen }) => {
     { path: "/books", label: "Books", icon: FaBook },
     { path: "/members", label: "Members", icon: FaUsers },
     { path: "/issue", label: "Issue Books", icon: FaClipboard },
+    { path: "/fines", label: "Fines", icon: FaMoneyBill },
   ];
 
   return (
@@ -31,9 +32,8 @@ const Sidebar = ({ isOpen }) => {
                   ${isActive ? "bg-blue-600 text-white" : "hover:bg-gray-700"}`}
                 >
                   <item.icon
-                    className={`text-lg ${
-                      isActive ? "text-white" : "text-gray-300"
-                    }`}
+                    className={`text-lg ${isActive ? "text-white" : "text-gray-300"
+                      }`}
                   />
                   {isOpen && (
                     <span className={`${isActive ? "font-semibold" : ""}`}>
