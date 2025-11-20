@@ -18,3 +18,14 @@ export const loginUser = async (username, password) => {
     throw error.response?.data || { message: "Network Error" };
   }
 };
+
+export const getProfile = async () => {
+  try {
+    const response = await api.get("/v1/library/profile");
+
+    return response.data?.resources?.data; // return only data
+  } catch (error) {
+    console.error("Profile Error:", error.response?.data || error.message);
+    throw error.response?.data || { message: "Network Error" };
+  }
+};

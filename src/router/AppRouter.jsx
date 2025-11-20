@@ -10,6 +10,7 @@ import NotFound from "../pages/NotFound";
 import ProtectedRoute from "../components/ProtectedRoute";
 import PublicRoute from "../components/PublicRoute";
 import Fines from "../pages/Fines";
+import Profile from "../pages/Profile";
 
 const AppRouter = () => {
   return (
@@ -39,6 +40,7 @@ const AppRouter = () => {
           <Route path="/issue" element={<BooksIssue />} />
           <Route path="/issue-Book" element={<IssueBook />} />
           <Route path="/fines" element={<Fines />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
 
         {/* Redirect root to login if not logged in */}

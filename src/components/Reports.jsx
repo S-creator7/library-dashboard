@@ -29,6 +29,17 @@ const Reports = () => {
     loadReports();
   }, [reportType]);
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+
   return (
     <div className="bg-white rounded-lg shadow p-5 mt-4">
       <h2 className="text-xl font-semibold text-gray-900 mb-4">Library Reports</h2>
@@ -66,39 +77,84 @@ const Reports = () => {
       </div>
 
       {/* Report Table */}
+      {/* Report Table */}
       {loading ? (
         <p className="text-gray-500 text-center py-6">Loading reports...</p>
       ) : reports.length === 0 ? (
         <p className="text-gray-500 text-center py-6">No data found.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 text-sm">
+
+            {/* ========= TABLE HEADER ========= */}
             <thead className="bg-gray-50">
               <tr>
-                {Object.keys(reports[0] || {}).map((key) => (
-                  <th
-                    key={key}
-                    className="px-4 py-2 text-left text-sm font-medium text-gray-700"
-                  >
-                    {key.replace(/_/g, " ").toUpperCase()}
-                  </th>
-                ))}
+                {Object.keys(reports[0])
+                  .filter(
+                    (key) =>
+                      ![
+                        "transaction_id",
+                        "book_id",
+                        "student_id",
+                        "session_id",
+                        "created_by",
+                        "updated_by",
+                        "deleted_at",
+                        "status",
+                      ].includes(key)
+                  )
+                  .map((key) => (
+                    <th
+                      key={key}
+                      className="px-4 py-2 text-left font-semibold text-gray-700"
+                    >
+                      {key.replace(/_/g, " ").toUpperCase()}
+                    </th>
+                  ))}
               </tr>
             </thead>
+
+            {/* ========= TABLE BODY ========= */}
             <tbody className="divide-y divide-gray-200">
-              {reports.map((row, index) => (
-                <tr key={index}>
-                  {Object.values(row).map((val, i) => (
-                    <td key={i} className="px-4 py-2 text-sm text-gray-700">
-                      {val !== null ? val.toString() : "-"}
-                    </td>
-                  ))}
+              {reports.map((row, idx) => (
+                <tr key={idx}>
+                  {Object.entries(row)
+                    .filter(
+                      ([key]) =>
+                        ![
+                          "transaction_id",
+                          "book_id",
+                          "student_id",
+                          "session_id",
+                          "created_by",
+                          "updated_by",
+                          "deleted_at",
+                          "status",
+                        ].includes(key)
+                    )
+                    .map(([key, value], i) => {
+                      // format dates
+                      const isDateField = [
+                        "issue_date",
+                        "return_date",
+                        "actual_return_date",
+                        "created_at",
+                        "updated_at",
+                      ].includes(key);
+
+                      return (
+                        <td key={i} className="px-4 py-2 text-gray-700">
+                          {isDateField ? formatDate(value) : value || "-"}
+                        </td>
+                      );
+                    })}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
     </div>
   );
 };

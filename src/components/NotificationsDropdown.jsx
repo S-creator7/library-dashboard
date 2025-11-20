@@ -1,109 +1,247 @@
 import React, { useEffect, useState, useRef } from "react";
 import { FaBell } from "react-icons/fa";
-import { getNotifications, markNotificationRead } from "../services/libraryNotifications";
+import { getNotifications } from "../services/notificationService";
+
+const notificationTypes = [
+  "ALL",
+  "library_due_reminder",
+  "library_overdue_alert",
+  "library_fine_notification",
+  "library_new_book",
+  "library_issue_confirmation",
+  "library_return_confirmation",
+];
 
 const NotificationsDropdown = () => {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [notificationType, setNotificationType] = useState("ALL");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
   const dropdownRef = useRef(null);
 
+  // Fetch when dropdown opens OR filters change
   useEffect(() => {
-    fetchNotifications();
-  }, []);
+    if (open) {
+      resetAndFetch();
+    }
+  }, [open, notificationType, startDate, endDate]);
 
-  // 🔹 Close dropdown when clicking outside
+  const resetAndFetch = () => {
+    setPage(1);
+    setNotifications([]);
+    fetchNotifications(1, true);
+  };
+
+  const fetchNotifications = async (pageNum = 1, reset = false) => {
+    if (loading) return;
+    setLoading(true);
+
+    const params = {
+      limit: 10,
+      page: pageNum,
+      notification_type: notificationType,
+    };
+
+    if (startDate) params.start_date = startDate;
+    if (endDate) params.end_date = endDate;
+
+    const res = await getNotifications(params);
+
+    const newData = res.data || [];
+
+    if (reset) {
+      setNotifications(newData);
+    } else {
+      setNotifications((prev) => [...prev, ...newData]);
+    }
+
+    setHasMore(newData.length >= 10);
+    setLoading(false);
+  };
+
+  const loadMore = () => {
+    if (!hasMore) return;
+    const next = page + 1;
+    setPage(next);
+    fetchNotifications(next);
+  };
+
+  // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const fetchNotifications = async () => {
-    setLoading(true);
-    try {
-      const data = await getNotifications({ limit: 10 });
-      const list = data?.data || [];
-      setNotifications(list);
-      setUnreadCount(list.filter((n) => !n.is_read).length);
-    } catch (err) {
-      console.error("❌ Error loading notifications:", err);
-    } finally {
-      setLoading(false);
-    }
+  const formatDateTime = (dateStr) => {
+    const d = new Date(dateStr);
+    return (
+      d.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }) +
+      " • " +
+      d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })
+    );
   };
 
-  const handleNotificationClick = async (notif) => {
-    if (!notif.is_read) {
-      await markNotificationRead(notif.notification_id);
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.notification_id === notif.notification_id ? { ...n, is_read: true } : n
-        )
-      );
-      setUnreadCount((count) => Math.max(count - 1, 0));
-    }
-
-    alert(`📘 ${notif.title}\n\n${notif.message}`);
-    // setOpen(false); 
-  };
+  const today = new Date().toISOString().split("T")[0];
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* 🔔 Bell Icon */}
       <button
         onClick={() => setOpen(!open)}
-        className="relative focus:outline-none mr-4"
+        className="relative text-white hover:text-gray-300"
       >
-        <FaBell className="text-white text-xl hover:text-gray-300" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-xs text-white rounded-full w-4 h-4 flex items-center justify-center">
-            {unreadCount}
+        <FaBell className="text-xl" />
+        {notifications.length > 0 && (
+          <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1.5 rounded-full">
+            {notifications.length}
           </span>
         )}
       </button>
 
-      {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 top-10 w-80 bg-white text-gray-800 rounded-lg shadow-lg border border-gray-200 z-50">
-          <div className="p-3 border-b flex justify-between items-center">
-            <h3 className="font-semibold text-gray-700">Notifications</h3>
-            <button
-              onClick={fetchNotifications}
-              className="text-xs text-blue-600 hover:underline"
-            >
-              Refresh
-            </button>
+        <div className="absolute right-0 mt-3 w-[420px] bg-white shadow-xl rounded-xl border z-50 overflow-hidden">
+          <div className="p-3 border-b font-semibold text-gray-700">
+            Notifications
           </div>
 
-          <div className="max-h-80 overflow-y-auto">
-            {loading ? (
-              <p className="p-4 text-sm text-gray-500 text-center">Loading...</p>
-            ) : notifications.length === 0 ? (
-              <p className="p-4 text-sm text-gray-500 text-center">No notifications yet.</p>
-            ) : (
-              notifications.map((notif) => (
-                <div
-                  key={notif.notification_id}
-                  onClick={() => handleNotificationClick(notif)}
-                  className={`p-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50 transition ${
-                    notif.is_read ? "bg-white" : "bg-gray-100"
-                  }`}
-                >
-                  <p className="font-medium text-gray-900 text-sm">{notif.title}</p>
-                  <p className="text-xs text-gray-600 mt-1 line-clamp-2">{notif.message}</p>
-                  <p className="text-[11px] text-gray-400 mt-1">
-                    {new Date(notif.created_at).toLocaleString()}
-                  </p>
-                </div>
-              ))
+          {/* ===== Filters Section ===== */}
+          {/* ===== Filters Section ===== */}
+          <div className="px-3 py-3 border-b space-y-3 bg-gray-50">
+
+            {/* Notification Type — NO SCROLLBAR BUT STILL HORIZONTAL SCROLL POSSIBLE */}
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1">
+              <div className="flex gap-2">
+                {notificationTypes.map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setNotificationType(type)}
+                    className={`px-3 py-1 rounded-full text-xs whitespace-nowrap border transition
+          ${notificationType === type
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-gray-700 border-gray-300"
+                      }`}
+                  >
+                    {type.replace(/_/g, " ")}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+
+            {/* Date Filters - both in one row, aligned perfectly */}
+            <div className="flex items-center gap-4">
+              {/* Start Date */}
+              <div className="flex items-center w-1/2 gap-2">
+                <label className="text-xs font-medium text-gray-600 whitespace-nowrap">Start:</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  max={endDate || today}
+                  className="bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
+                />
+              </div>
+
+              {/* End Date */}
+              <div className="flex items-center w-1/2 gap-2">
+                <label className="text-xs font-medium text-gray-600 whitespace-nowrap">End:</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  max={today}
+                  min={startDate}
+                  className="bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
+                />
+              </div>
+            </div>
+
+
+
+
+            {/* Reset Button */}
+            {(startDate || endDate) && (
+              <button
+                className="text-blue-600 text-xs underline"
+                onClick={() => {
+                  setStartDate("");
+                  setEndDate("");
+                }}
+              >
+                Reset Date Filters
+              </button>
             )}
           </div>
+
+
+          {/* ===================== Notifications List ===================== */}
+          <ul className="max-h-80 overflow-y-auto divide-y">
+            {loading && notifications.length === 0 ? (
+              <p className="p-4 text-gray-500 text-sm text-center">
+                Loading...
+              </p>
+            ) : notifications.length === 0 ? (
+              <div className="p-6 text-center flex flex-col items-center text-gray-500">
+                <img
+                  src="https://cdn-icons-png.flaticon.com/512/4076/4076505.png"
+                  alt="empty"
+                  className="w-20 opacity-70 mb-2"
+                />
+                No notifications found.
+              </div>
+            ) : (
+              notifications.map((n) => (
+                <li
+                  key={n.notification_id}
+                  className="px-4 py-3 hover:bg-gray-50 transition cursor-pointer"
+                >
+                  <div className="font-semibold text-sm text-gray-800">
+                    {n.title}
+                  </div>
+
+                  <div className="text-xs text-gray-600 mt-1">
+                    {n.message}
+                  </div>
+
+                  <div className="mt-2 text-[11px] text-gray-500">
+                    <span className="font-semibold">To:</span>{" "}
+                    <span className="text-gray-700">{n.recipient_name}</span>{" "}
+                    •{" "}
+                    <span className="uppercase">{n.recipient_type}</span>
+                  </div>
+
+                  <div className="text-[11px] text-gray-400 mt-1">
+                    {formatDateTime(n.created_at)}
+                  </div>
+                </li>
+              ))
+            )}
+          </ul>
+
+          {/* Load More */}
+          {hasMore && (
+            <div
+              onClick={loadMore}
+              className="p-3 text-blue-600 text-sm text-center hover:bg-gray-100 cursor-pointer"
+            >
+              Load More
+            </div>
+          )}
+
         </div>
       )}
     </div>
