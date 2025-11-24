@@ -70,6 +70,17 @@ const Login = () => {
             </button>
           </div>
 
+          {/* Forgot Password Link */}
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => navigate("/forgot-password")}
+              className="text-blue-700 hover:text-blue-900 underline"
+            >
+              Forgot password?
+            </button>
+          </div>
+
           {/* Login Button */}
           <button
             type="submit"
@@ -78,7 +89,6 @@ const Login = () => {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
-
           {/* Error Message */}
           {error && (
             <p className="text-red-500 text-center text-sm mt-2">{error}</p>

@@ -11,6 +11,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import PublicRoute from "../components/PublicRoute";
 import Fines from "../pages/Fines";
 import Profile from "../pages/Profile";
+import ForgotPassword from "../pages/ForgotPassword";
 
 const AppRouter = () => {
   return (
@@ -22,6 +23,16 @@ const AppRouter = () => {
           element={
             <PublicRoute>
               <Login />
+            </PublicRoute>
+          }
+        />
+
+        {/* Forgot Password Page - Public */}
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicRoute>
+              <ForgotPassword />
             </PublicRoute>
           }
         />

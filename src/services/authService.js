@@ -19,6 +19,16 @@ export const loginUser = async (username, password) => {
   }
 };
 
+export const forgotPassword = async (email) => {
+  try {
+    const response = await api.post("/v1/library/forgot-password", { email });
+    return response.data;
+  } catch (error) {
+    console.error("Forgot password error:", error.response?.data || error.message);
+    throw error.response?.data || { message: "Network Error" };
+  }
+};
+
 export const getProfile = async () => {
   try {
     const response = await api.get("/v1/library/profile");

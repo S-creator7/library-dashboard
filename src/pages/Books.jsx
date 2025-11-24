@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { getBooks } from "../services/bookService";
+import { getBooks, bulkUploadBooks } from "../services/bookService";
 import BookCards from "../components/BookCards";
 import AddBook from "../components/AddBook";
 import Pagination from "../components/Pagination";
+import BooksBulkUploadModal from "../components/BooksBulkUploadModal";
 
 const Books = () => {
   const [books, setBooks] = useState([]);
@@ -15,12 +16,31 @@ const Books = () => {
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
 
-   // 🔁 Debounce filters — wait 300ms after last change
+  const handleBulkUpload = async (file) => {
+    if (!file) return;
+
+    setUploadError("");
+    setUploading(true);
+    try {
+      await bulkUploadBooks(file);
+      await loadBooks();
+      setShowBulkModal(false);
+    } catch (error) {
+      console.error("Bulk upload failed:", error);
+      setUploadError(error?.message || "Failed to bulk upload books. Please check your file and try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedFilters(filters);
@@ -52,12 +72,29 @@ const Books = () => {
       {/* Header Section */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800">Books</h1>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-all"
-        >
-          + Add Book
-        </button>
+        <div className="flex flex-col items-end gap-1">
+          {uploadError && (
+            <p className="text-xs text-red-600 max-w-xs text-right">
+              {uploadError}
+            </p>
+          )}
+          <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-100 transition-all text-sm"
+            onClick={() => setShowBulkModal(true)}
+            disabled={uploading}
+          >
+            {uploading ? "Uploading..." : "Bulk Upload"}
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-all"
+          >
+            + Add Book
+          </button>
+          </div>
+        </div>
       </div>
 
       {/* Filter Section */}
@@ -116,6 +153,18 @@ const Books = () => {
       {/* Add Book Modal */}
       {showAddModal && (
         <AddBook onClose={() => setShowAddModal(false)} onBookAdded={loadBooks} />
+      )}
+
+      {/* Bulk Upload Books Modal */}
+      {showBulkModal && (
+        <BooksBulkUploadModal
+          isOpen={showBulkModal}
+          onClose={() => setShowBulkModal(false)}
+          onUpload={handleBulkUpload}
+          uploading={uploading}
+          error={uploadError}
+          templateUrl={"/templates/books.xlsx"}
+        />
       )}
     </div>
   );
