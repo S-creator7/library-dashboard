@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { getProfile } from "../services/authService";
+import { changePassword, getProfile } from "../services/authService";
 
 const Profile = () => {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmNewPassword, setConfirmNewPassword] = useState("");
+    const [passwordMessage, setPasswordMessage] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    const [passwordLoading, setPasswordLoading] = useState(false);
 
     useEffect(() => {
         fetchProfile();
@@ -35,6 +41,34 @@ const Profile = () => {
             console.log("Profile fetch failed:", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handlePasswordChange = async (e) => {
+        e.preventDefault();
+        setPasswordMessage("");
+        setPasswordError("");
+
+        if (newPassword !== confirmNewPassword) {
+            setPasswordError("New passwords do not match.");
+            return;
+        }
+
+        setPasswordLoading(true);
+        try {
+            const res = await changePassword(currentPassword, newPassword);
+            if (res.status) {
+                setPasswordMessage(res.message || "Password changed successfully.");
+                setCurrentPassword("");
+                setNewPassword("");
+                setConfirmNewPassword("");
+            } else {
+                setPasswordError(res.message || "Unable to change password.");
+            }
+        } catch (err) {
+            setPasswordError(err.message || "Failed to change password.");
+        } finally {
+            setPasswordLoading(false);
         }
     };
 
@@ -176,6 +210,51 @@ const Profile = () => {
                 <p><strong>Status:</strong> {profile.today_attendance.status || "N/A"}</p>
                 <p><strong>In Time:</strong> {profile.today_attendance.in_time || "—"}</p>
                 <p><strong>Out Time:</strong> {profile.today_attendance.out_time || "—"}</p>
+            </div>
+
+            <div className="mt-8 bg-white shadow-md rounded-xl p-6 mb-10">
+                <h3 className="text-xl font-semibold mb-4">Change Password</h3>
+                <form onSubmit={handlePasswordChange} className="space-y-4 max-w-xl">
+                    <input
+                        type="password"
+                        placeholder="Current password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                    />
+                    <input
+                        type="password"
+                        placeholder="New password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                        minLength={8}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                    />
+                    <input
+                        type="password"
+                        placeholder="Confirm new password"
+                        value={confirmNewPassword}
+                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                        required
+                        minLength={8}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                    />
+                    <button
+                        type="submit"
+                        disabled={passwordLoading}
+                        className="bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                        {passwordLoading ? "Updating..." : "Update Password"}
+                    </button>
+                    {passwordMessage && (
+                        <p className="text-green-600 text-sm">{passwordMessage}</p>
+                    )}
+                    {passwordError && (
+                        <p className="text-red-500 text-sm">{passwordError}</p>
+                    )}
+                </form>
             </div>
 
         </div>
