@@ -12,6 +12,7 @@ import PublicRoute from "../components/PublicRoute";
 import Fines from "../pages/Fines";
 import Profile from "../pages/Profile";
 import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 
 const AppRouter = () => {
   return (
@@ -33,6 +34,15 @@ const AppRouter = () => {
           element={
             <PublicRoute>
               <ForgotPassword />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/reset-password"
+          element={
+            <PublicRoute>
+              <ResetPassword />
             </PublicRoute>
           }
         />

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { getAllFines, updateFine } from "../services/fineService";
 import Pagination from "../components/Pagination";
 import { FaCheck, FaTimes, FaEdit } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const Fines = () => {
   const [fines, setFines] = useState([]);
@@ -80,12 +81,12 @@ const Fines = () => {
         notified_teacher: true,
         remarks: editData.remarks,
       });
-      alert(res.message || "Fine updated successfully.");
+      toast.success(res.message || "Fine updated successfully.");
       setEditingRow(null);
       loadFines();
     } catch (err) {
       console.error("Error updating fine:", err);
-      alert("Failed to update fine.");
+      toast.error("Failed to update fine.");
     }
   };
 

@@ -3,6 +3,7 @@ import ConstantSelectors from "./ConstantSelectors";
 import { getBooks } from "../services/bookService";
 import { issueBook } from "../services/issueService";
 import Pagination from "./Pagination";
+import { toast } from "react-toastify";
 
 const IssueBook = () => {
   const [filters, setFilters] = useState({
@@ -42,12 +43,12 @@ const IssueBook = () => {
   // Issue selected book
   const handleIssue = async () => {
     if (!selectedBook || !filters.classroom_id || !filters.student_id) {
-      alert("Please select a student and a book first.");
+      toast.warn("Please select a student and a book first.");
       return;
     }
 
     if (!dueDate) {
-      alert("Please select a due date.");
+      toast.warn("Please select a due date.");
       return;
     }
 
@@ -64,13 +65,13 @@ const IssueBook = () => {
     setIssuing(true);
     try {
       const res = await issueBook(payload);
-      alert(res.message || "Book issued successfully!");
+      toast.success(res.message || "Book issued successfully!");
       setSelectedBook(null);
       setDueDate("");
       loadBooks(); // Refresh book list if needed
     } catch (err) {
       console.error(err);
-      alert(err.message || "Failed to issue book.");
+      toast.error(err.message || "Failed to issue book.");
     } finally {
       setIssuing(false);
     }

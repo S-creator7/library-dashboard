@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { getIssuedBooks, returnBook } from "../services/issueService";
 import { getFineReasons, imposeFine } from "../services/fineService";
 import Pagination from "./Pagination";
+import { toast } from "react-toastify";
 
 const IssuedBooks = () => {
     const [books, setBooks] = useState([]);
@@ -50,17 +51,20 @@ const IssuedBooks = () => {
         loadBooks();
     }, [filters.status, page, limit]);
 
-    // Return book
     const handleReturn = async (issue_id, book_title) => {
-        const confirmed = window.confirm(`Are you sure you want to return "${book_title}"?`);
+        const confirmed = await confirmToast(
+            `Are you sure you want to return "${book_title}"?`
+        );
+
         if (!confirmed) return;
+
         try {
             const res = await returnBook(issue_id);
-            alert(res.message || "Book returned successfully.");
+            toast.success(res.message || "Book returned successfully.");
             loadBooks();
         } catch (err) {
             console.error("Error returning book:", err);
-            alert("Failed to return book.");
+            toast.error("Failed to return book.");
         }
     };
 
@@ -92,7 +96,7 @@ const IssuedBooks = () => {
     const handleFineSubmit = async () => {
         const { reason_id, fine_amount, fine_due_date, remarks } = fineData;
         if (!reason_id || !fine_amount || !fine_due_date) {
-            alert("Please fill all required fields.");
+            toast.warn("Please fill all required fields.");
             return;
         }
         try {
@@ -104,15 +108,49 @@ const IssuedBooks = () => {
                 fine_due_date,
                 remarks,
             });
-            alert(response.message || "Fine added successfully.");
+            toast.success(response.message || "Fine added successfully.");
             setFineModal({ open: false, book: null });
             loadBooks();
         } catch (err) {
             console.error("Error creating fine:", err);
-            alert("Failed to create fine.");
+            toast.error("Failed to create fine.");
         }
     };
 
+    const confirmToast = (message) => {
+        return new Promise((resolve) => {
+            toast(
+                ({ closeToast }) => (
+                    <div className="text-sm">
+                        <p className="mb-2">{message}</p>
+
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => {
+                                    resolve(true);
+                                    closeToast();
+                                }}
+                                className="px-2 py-1 bg-green-600 text-white rounded"
+                            >
+                                Yes
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    resolve(false);
+                                    closeToast();
+                                }}
+                                className="px-2 py-1 bg-gray-400 text-white rounded"
+                            >
+                                No
+                            </button>
+                        </div>
+                    </div>
+                ),
+                { autoClose: false }
+            );
+        });
+    };
     return (
         <div>
             {/* Filters */}
