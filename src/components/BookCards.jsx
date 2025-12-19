@@ -1,21 +1,64 @@
 import React, { useState } from "react";
 import { deleteBook } from "../services/bookService";
 import AddBook from "./AddBook";
+import { toast } from "react-toastify";
+
 const BookCards = ({ books, onBookUpdated }) => {
     const [selectedBook, setSelectedBook] = useState(null);
     const [editingBook, setEditingBook] = useState(null);
 
     const handleDelete = async (book_id) => {
-        if (!window.confirm("Are you sure you want to delete this book?")) return;
+        const confirmed = await confirmToast(
+            "Are you sure you want to delete this book?"
+        );
+
+        if (!confirmed) return;
+
         try {
             await deleteBook(book_id);
+            toast.success("Book deleted!");
             onBookUpdated();
         } catch (err) {
-            alert(err.message || "Failed to delete book");
+            toast.error(err.message || "Failed to delete book");
         }
     };
+
     const handleClose = () => setSelectedBook(null);
 
+    const confirmToast = (message) => {
+        return new Promise((resolve) => {
+            toast(
+                ({ closeToast }) => (
+                    <div className="text-sm">
+                        <p>{message}</p>
+
+                        <div className="flex gap-2 mt-2">
+                            <button
+                                onClick={() => {
+                                    resolve(true);
+                                    closeToast();
+                                }}
+                                className="px-2 py-1 bg-red-600 text-white rounded"
+                            >
+                                Yes
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    resolve(false);
+                                    closeToast();
+                                }}
+                                className="px-2 py-1 bg-gray-400 text-white rounded"
+                            >
+                                No
+                            </button>
+                        </div>
+                    </div>
+                ),
+                { autoClose: false }
+            );
+        });
+    };
     return (
         <>
             {/* Grid of book cards */}
