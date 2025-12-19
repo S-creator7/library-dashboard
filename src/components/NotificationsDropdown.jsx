@@ -19,13 +19,10 @@ const NotificationsDropdown = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
-
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-
   const dropdownRef = useRef(null);
 
-  // Fetch when dropdown opens OR filters change
   useEffect(() => {
     if (open) {
       resetAndFetch();
@@ -52,7 +49,6 @@ const NotificationsDropdown = () => {
     if (endDate) params.end_date = endDate;
 
     const res = await getNotifications(params);
-
     const newData = res.data || [];
 
     if (reset) {
@@ -72,7 +68,6 @@ const NotificationsDropdown = () => {
     fetchNotifications(next);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -113,135 +108,137 @@ const NotificationsDropdown = () => {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-3 w-[420px] bg-white shadow-xl rounded-xl border z-50 overflow-hidden">
-          <div className="p-3 border-b font-semibold text-gray-700">
-            Notifications
-          </div>
-
-          {/* ===== Filters Section ===== */}
-          {/* ===== Filters Section ===== */}
-          <div className="px-3 py-3 border-b space-y-3 bg-gray-50">
-
-            {/* Notification Type — NO SCROLLBAR BUT STILL HORIZONTAL SCROLL POSSIBLE */}
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1">
-              <div className="flex gap-2">
-                {notificationTypes.map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setNotificationType(type)}
-                    className={`px-3 py-1 rounded-full text-xs whitespace-nowrap border transition
-          ${notificationType === type
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-700 border-gray-300"
-                      }`}
-                  >
-                    {type.replace(/_/g, " ")}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-
-            {/* Date Filters - both in one row, aligned perfectly */}
-            <div className="flex items-center gap-4">
-              {/* Start Date */}
-              <div className="flex items-center w-1/2 gap-2">
-                <label className="text-xs font-medium text-gray-600 whitespace-nowrap">Start:</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  max={endDate || today}
-                  className="bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
-                />
-              </div>
-
-              {/* End Date */}
-              <div className="flex items-center w-1/2 gap-2">
-                <label className="text-xs font-medium text-gray-600 whitespace-nowrap">End:</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  max={today}
-                  min={startDate}
-                  className="bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
-                />
-              </div>
-            </div>
-
-
-
-
-            {/* Reset Button */}
-            {(startDate || endDate) && (
-              <button
-                className="text-blue-600 text-xs underline"
-                onClick={() => {
-                  setStartDate("");
-                  setEndDate("");
-                }}
-              >
-                Reset Date Filters
-              </button>
-            )}
-          </div>
-
-
-          {/* ===================== Notifications List ===================== */}
-          <ul className="max-h-80 overflow-y-auto divide-y">
-            {loading && notifications.length === 0 ? (
-              <p className="p-4 text-gray-500 text-sm text-center">
-                Loading...
-              </p>
-            ) : notifications.length === 0 ? (
-              <div className="p-6 text-center flex flex-col items-center text-gray-500">
-                <img
-                  src="https://cdn-icons-png.flaticon.com/512/4076/4076505.png"
-                  alt="empty"
-                  className="w-20 opacity-70 mb-2"
-                />
-                No notifications found.
-              </div>
-            ) : (
-              notifications.map((n) => (
-                <li
-                  key={n.notification_id}
-                  className="px-4 py-3 hover:bg-gray-50 transition cursor-pointer"
+        <div className="fixed inset-0 z-40">
+          <div 
+            className="absolute inset-0 bg-opacity-25"
+            onClick={() => setOpen(false)}
+          />
+          
+          <div
+            className={`absolute top-0 right-0 h-screen w-[420px] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out ${
+              open ? "translate-x-0" : "translate-x-full"
+            }`}
+          >
+            <div className="h-full flex flex-col">
+              <div className="p-4 border-b font-semibold text-gray-700 text-lg flex justify-between items-center">
+                <span>Notifications</span>
+                <button
+                  onClick={() => setOpen(false)}
+                  className="text-gray-500 hover:text-gray-700 text-lg"
                 >
-                  <div className="font-semibold text-sm text-gray-800">
-                    {n.title}
+                  ×
+                </button>
+              </div>
+
+              <div className="px-4 py-3 border-b space-y-3 bg-gray-50">
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  <div className="flex gap-2">
+                    {notificationTypes.map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => setNotificationType(type)}
+                        className={`px-3 py-1.5 rounded-full text-xs whitespace-nowrap border transition ${
+                          notificationType === type
+                            ? "bg-blue-600 text-white border-blue-600"
+                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                        }`}
+                      >
+                        {type.replace(/_/g, " ")}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center w-1/2 gap-2">
+                    <label className="text-xs font-medium text-gray-600 whitespace-nowrap">Start:</label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      max={endDate || today}
+                      className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                    />
                   </div>
 
-                  <div className="text-xs text-gray-600 mt-1">
-                    {n.message}
+                  <div className="flex items-center w-1/2 gap-2">
+                    <label className="text-xs font-medium text-gray-600 whitespace-nowrap">End:</label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      max={today}
+                      min={startDate}
+                      className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                    />
                   </div>
+                </div>
 
-                  <div className="mt-2 text-[11px] text-gray-500">
-                    <span className="font-semibold">To:</span>{" "}
-                    <span className="text-gray-700">{n.recipient_name}</span>{" "}
-                    •{" "}
-                    <span className="uppercase">{n.recipient_type}</span>
+                {(startDate || endDate) && (
+                  <button
+                    className="text-blue-600 text-xs underline hover:text-blue-800"
+                    onClick={() => {
+                      setStartDate("");
+                      setEndDate("");
+                    }}
+                  >
+                    Reset Date Filters
+                  </button>
+                )}
+              </div>
+
+              <div className="flex-1 overflow-y-auto">
+                {loading && notifications.length === 0 ? (
+                  <div className="flex items-center justify-center h-32">
+                    <div className="text-gray-500">Loading notifications...</div>
                   </div>
-
-                  <div className="text-[11px] text-gray-400 mt-1">
-                    {formatDateTime(n.created_at)}
+                ) : notifications.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full p-6 text-gray-500">
+                    <img
+                      src="https://cdn-icons-png.flaticon.com/512/4076/4076505.png"
+                      alt="empty"
+                      className="w-24 opacity-50 mb-4"
+                    />
+                    <p className="text-gray-600">No notifications found</p>
+                    <p className="text-sm text-gray-400 mt-1">Try changing your filters</p>
                   </div>
-                </li>
-              ))
-            )}
-          </ul>
+                ) : (
+                  <ul className="divide-y">
+                    {notifications.map((n) => (
+                      <li
+                        key={n.notification_id}
+                        className="px-4 py-3 hover:bg-gray-50 transition cursor-pointer border-l-4 border-l-transparent hover:border-l-blue-500"
+                        style={{borderBottom: '1px solid black'}}
+                      >
+                        <div className="font-semibold text-sm text-gray-800">{n.title}</div>
+                        <div className="text-xs text-gray-600 mt-1">{n.message}</div>
+                        <div className="mt-2 text-[11px] text-gray-500">
+                          <span className="font-semibold">To:</span>{" "}
+                          <span className="text-gray-700">{n.recipient_name}</span> •{" "}
+                          <span className="uppercase">{n.recipient_type}</span>
+                        </div>
+                        <div className="text-[11px] text-gray-400 mt-1">
+                          {formatDateTime(n.created_at)}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
-          {/* Load More */}
-          {hasMore && (
-            <div
-              onClick={loadMore}
-              className="p-3 text-blue-600 text-sm text-center hover:bg-gray-100 cursor-pointer"
-            >
-              Load More
+              {hasMore && notifications.length > 0 && (
+                <div className="border-t">
+                  <button
+                    onClick={loadMore}
+                    disabled={loading}
+                    className="w-full p-3 text-blue-600 text-sm hover:bg-gray-100 transition disabled:text-gray-400 disabled:cursor-not-allowed"
+                  >
+                    {loading ? "Loading..." : "Load More"}
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-
+          </div>
         </div>
       )}
     </div>
