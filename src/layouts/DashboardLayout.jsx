@@ -1,3 +1,37 @@
+// import { useState } from "react";
+// import { Outlet } from "react-router-dom";
+// import Sidebar from "../components/Sidebar";
+// import Header from "../components/Header";
+
+// const DashboardLayout = () => {
+//   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+//   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+//   return (
+//     <div className="flex flex-col min-h-screen">
+//       {/* Header fixed at top */}
+//       <Header toggleSidebar={toggleSidebar} />
+
+//       {/* Main area (below header) */}
+//       <div className="flex flex-1">
+//         {/* Sidebar (optional toggle) */}
+//         {isSidebarOpen && (
+//           <Sidebar isOpen={isSidebarOpen} className="w-64 bg-gray-800 text-white" />
+//         )}
+
+//         {/* Page content */}
+//         <main className="flex-1 p-4 mt-14 bg-gray-50 overflow-y-auto">
+//           <Outlet />
+//         </main>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default DashboardLayout;
+
+
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
@@ -9,19 +43,22 @@ const DashboardLayout = () => {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Header fixed at top */}
+    <div className="flex flex-col h-screen overflow-hidden">
+      {/* Fixed Header */}
       <Header toggleSidebar={toggleSidebar} />
 
-      {/* Main area (below header) */}
-      <div className="flex flex-1">
-        {/* Sidebar (optional toggle) */}
+      {/* Below Header */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
         {isSidebarOpen && (
-          <Sidebar isOpen={isSidebarOpen} className="w-64 bg-gray-800 text-white" />
+          <Sidebar
+            isOpen={isSidebarOpen}
+            className="w-64 bg-gray-800 text-white shrink-0"
+          />
         )}
 
-        {/* Page content */}
-        <main className="flex-1 p-4 mt-14 bg-gray-50 overflow-y-auto">
+        {/* Scrollable content area */}
+        <main className="flex-1 bg-gray-50 mt-14 overflow-y-auto p-4">
           <Outlet />
         </main>
       </div>

@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { addBook } from "../services/bookService";
+import React, { useState, useEffect } from "react";
+import { addBook, updateBook } from "../services/bookService";
 
-const AddBook = ({ onClose, onBookAdded }) => {
+const AddBook = ({ onClose, onBookAdded, book }) => {
     const [form, setForm] = useState({
         title: "",
         author: "",
@@ -16,10 +16,25 @@ const AddBook = ({ onClose, onBookAdded }) => {
     const [error, setError] = useState("");
     const [fieldErrors, setFieldErrors] = useState({});
 
+    useEffect(() => {
+        if (book) {
+            setForm({
+                title: book.title || "",
+                author: book.author || "",
+                publisher: book.publisher || "",
+                year_of_publication: book.year_of_publication || "",
+                category: book.category || "",
+                isbn_number: book.isbn_number || "",
+                description: book.description || "",
+                quantity: book.quantity || 1,
+            });
+        }
+    }, [book]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setForm({ ...form, [name]: value });
-        setFieldErrors({ ...fieldErrors, [name]: "" }); // clear field-specific error
+        setFieldErrors({ ...fieldErrors, [name]: "" });
     };
 
     const validateForm = () => {
@@ -52,7 +67,11 @@ const AddBook = ({ onClose, onBookAdded }) => {
 
         setLoading(true);
         try {
-            await addBook(form);
+            if (book) {
+                await updateBook(book.book_id, form);
+            } else {
+                await addBook(form);
+            }
             onBookAdded();
             onClose();
         } catch (err) {
@@ -62,20 +81,34 @@ const AddBook = ({ onClose, onBookAdded }) => {
         }
     };
 
-    // Ensure all fields filled before submit
     const isFormValid = Object.values(form).every((v) => v !== "" && v !== null);
+    const isEdit = !!book;
 
     return (
-        <div className="fixed inset-0 flex justify-center items-center z-50">
+        <div className="fixed inset-0 flex justify-center items-center z-50 p-4">
             {/* Overlay */}
             <div
                 className="absolute inset-0 bg-black bg-opacity-25"
                 onClick={onClose}
             />
-            <div className="relative bg-white rounded-lg shadow-lg w-full max-w-lg p-6 z-10">
-                <h2 className="text-xl font-bold mb-4 text-gray-900">Add New Book</h2>
 
-                <form onSubmit={handleSubmit} className="space-y-3">
+            {/* Modal box */}
+            <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md h-[85vh] flex flex-col z-10">
+                {/* Header */}
+                <div className="flex justify-between items-center px-6 py-4 border-b border-gray-400">
+                    <h2 className="text-lg font-semibold text-gray-900">
+                        {isEdit ? "Edit Book" : "Add New Book"}
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="text-gray-500 hover:text-gray-700 text-xl leading-none"
+                    >
+                        &times;
+                    </button>
+                </div>
+
+                {/* Scrollable Form Area */}
+                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
                     {[
                         { name: "title", label: "Title" },
                         { name: "author", label: "Author" },
@@ -90,26 +123,35 @@ const AddBook = ({ onClose, onBookAdded }) => {
                             value={form[name]}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
                         />
                     ))}
 
                     {/* Year */}
                     <div>
-                        <input
-                            type="number"
+                        <select
                             name="year_of_publication"
-                            placeholder="Year of Publication"
                             value={form.year_of_publication}
                             onChange={handleChange}
                             required
-                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 ${fieldErrors.year_of_publication ? "border-red-500" : "border-gray-300"
+                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400 ${fieldErrors.year_of_publication ? "border-red-500" : "border-gray-300"
                                 }`}
-                        />
+                        >
+                            <option value="">Select Year of Publication</option>
+                            {Array.from({ length: new Date().getFullYear() - 1899 }, (_, i) => {
+                                const year = new Date().getFullYear() - i;
+                                return (
+                                    <option key={year} value={year}>
+                                        {year}
+                                    </option>
+                                );
+                            })}
+                        </select>
                         {fieldErrors.year_of_publication && (
                             <p className="text-red-500 text-xs mt-1">{fieldErrors.year_of_publication}</p>
                         )}
                     </div>
+
 
                     {/* ISBN */}
                     <div>
@@ -120,7 +162,7 @@ const AddBook = ({ onClose, onBookAdded }) => {
                             value={form.isbn_number}
                             onChange={handleChange}
                             required
-                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 ${fieldErrors.isbn_number ? "border-red-500" : "border-gray-300"
+                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400 ${fieldErrors.isbn_number ? "border-red-500" : "border-gray-300"
                                 }`}
                         />
                         {fieldErrors.isbn_number && (
@@ -137,7 +179,7 @@ const AddBook = ({ onClose, onBookAdded }) => {
                             onChange={handleChange}
                             required
                             rows={3}
-                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 ${fieldErrors.description ? "border-red-500" : "border-gray-300"
+                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400 ${fieldErrors.description ? "border-red-500" : "border-gray-300"
                                 }`}
                         />
                         {fieldErrors.description && (
@@ -154,28 +196,30 @@ const AddBook = ({ onClose, onBookAdded }) => {
                         value={form.quantity}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
                     />
 
                     {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                </div>
 
-                    <div className="flex justify-end space-x-3 mt-4">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={loading || !isFormValid}
-                            className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50"
-                        >
-                            {loading ? "Adding..." : "Add Book"}
-                        </button>
-                    </div>
-                </form>
+                {/* Footer Buttons */}
+                <div className="flex justify-end gap-3 p-4 border-t border-gray-400">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={loading || !isFormValid}
+                        onClick={handleSubmit}
+                        className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-all disabled:opacity-50"
+                    >
+                        {loading ? "Saving..." : isEdit ? "Update Book" : "Add Book"}
+                    </button>
+                </div>
             </div>
         </div>
     );

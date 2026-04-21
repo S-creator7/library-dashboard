@@ -18,3 +18,50 @@ export const loginUser = async (username, password) => {
     throw error.response?.data || { message: "Network Error" };
   }
 };
+
+export const forgotPassword = async (email) => {
+  try {
+    const response = await api.post("/v1/library/forgot-password", { email });
+    return response.data;
+  } catch (error) {
+    console.error("Forgot password error:", error.response?.data || error.message);
+    throw error.response?.data || { message: "Network Error" };
+  }
+};
+
+export const resetPassword = async (token, password) => {
+  try {
+    const response = await api.post("/v1/library/reset-password", {
+      token,
+      password,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Reset password error:", error.response?.data || error.message);
+    throw error.response?.data || { message: "Network Error" };
+  }
+};
+
+export const changePassword = async (current_password, new_password) => {
+  try {
+    const response = await api.post("/v1/library/change-password", {
+      current_password,
+      new_password,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Change password error:", error.response?.data || error.message);
+    throw error.response?.data || { message: "Network Error" };
+  }
+};
+
+export const getProfile = async () => {
+  try {
+    const response = await api.get("/v1/library/profile");
+
+    return response.data?.resources?.data; // return only data
+  } catch (error) {
+    console.error("Profile Error:", error.response?.data || error.message);
+    throw error.response?.data || { message: "Network Error" };
+  }
+};

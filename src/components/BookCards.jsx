@@ -1,10 +1,64 @@
 import React, { useState } from "react";
+import { deleteBook } from "../services/bookService";
+import AddBook from "./AddBook";
+import { toast } from "react-toastify";
 
-const BookCards = ({ books }) => {
+const BookCards = ({ books, onBookUpdated }) => {
     const [selectedBook, setSelectedBook] = useState(null);
+    const [editingBook, setEditingBook] = useState(null);
+
+    const handleDelete = async (book_id) => {
+        const confirmed = await confirmToast(
+            "Are you sure you want to delete this book?"
+        );
+
+        if (!confirmed) return;
+
+        try {
+            await deleteBook(book_id);
+            toast.success("Book deleted!");
+            onBookUpdated();
+        } catch (err) {
+            toast.error(err.message || "Failed to delete book");
+        }
+    };
 
     const handleClose = () => setSelectedBook(null);
 
+    const confirmToast = (message) => {
+        return new Promise((resolve) => {
+            toast(
+                ({ closeToast }) => (
+                    <div className="text-sm">
+                        <p>{message}</p>
+
+                        <div className="flex gap-2 mt-2">
+                            <button
+                                onClick={() => {
+                                    resolve(true);
+                                    closeToast();
+                                }}
+                                className="px-2 py-1 bg-red-600 text-white rounded"
+                            >
+                                Yes
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    resolve(false);
+                                    closeToast();
+                                }}
+                                className="px-2 py-1 bg-gray-400 text-white rounded"
+                            >
+                                No
+                            </button>
+                        </div>
+                    </div>
+                ),
+                { autoClose: false }
+            );
+        });
+    };
     return (
         <>
             {/* Grid of book cards */}
@@ -12,28 +66,46 @@ const BookCards = ({ books }) => {
                 {books.map((book) => (
                     <div
                         key={book.book_id}
-                        className="bg-white shadow-md rounded-lg p-4 border border-gray-100 hover:shadow-lg transition-all"
+                        className="bg-white shadow-md rounded-lg p-4 border border-gray-200 hover:shadow-lg transition-all"
                     >
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">{book.title}</h3>
-                        <p className="text-sm text-gray-600 mb-1">Author: {book.author}</p>
-                        <p className="text-sm text-gray-600 mb-1">Publisher: {book.publisher}</p>
-                        <p className="text-sm text-gray-500 mb-1">Year: {book.year_of_publication}</p>
-                        <p className="text-sm text-gray-500">Category: {book.category}</p>
+                        <h3 className="text-lg font-semibold text-gray-900">{book.title}</h3>
+                        <p className="text-sm text-gray-600">Author: {book.author}</p>
+                        <p className="text-sm text-gray-600">Publisher: {book.publisher}</p>
+                        <p className="text-sm text-gray-500">Year: {book.year_of_publication}</p>
+                        <span className="text-xs text-gray-500"> Available: {book.available_quantity || 0}/{book.quantity} </span>
                         <div className="mt-3 flex justify-between items-center">
-                            <span className="text-xs text-gray-500">
-                                Available: {book.available_quantity || 0}/{book.quantity}
-                            </span>
                             <button
                                 onClick={() => setSelectedBook(book)}
                                 className="text-sm text-gray-900 font-medium hover:underline"
                             >
                                 View
                             </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setEditingBook(book)}
+                                    className="text-sm text-blue-600 hover:underline"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(book.book_id)}
+                                    className="text-sm text-red-600 hover:underline"
+                                >
+                                    Delete
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ))}
             </div>
 
+            {editingBook && (
+                <AddBook
+                    book={editingBook}
+                    onClose={() => setEditingBook(null)}
+                    onBookAdded={onBookUpdated}
+                />
+            )}
             {/* Modal for viewing details */}
             {selectedBook && (
                 <div className="fixed inset-0 bg-gray-900 bg-opacity-20 flex justify-center items-center z-50">
