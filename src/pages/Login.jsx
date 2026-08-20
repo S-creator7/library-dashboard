@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/authService";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // 👈 imported from react-icons
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -30,9 +30,9 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6 text-gray-900">
+    <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md border border-[#E2E8F0]">
+        <h2 className="text-2xl font-bold text-center mb-6 text-[#0F172A]">
           Library Login
         </h2>
 
@@ -44,7 +44,7 @@ const Login = () => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+            className="w-full px-4 py-3 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f86730] focus:border-[#f86730]"
           />
 
           {/* Password Field with Eye Toggle */}
@@ -55,12 +55,12 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 pr-12"
+              className="w-full px-4 py-3 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f86730] focus:border-[#f86730] pr-12"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-800"
+              className="absolute inset-y-0 right-3 flex items-center text-[#64748B] hover:text-[#0F172A]"
             >
               {showPassword ? (
                 <FaEyeSlash className="w-5 h-5" />
@@ -75,7 +75,7 @@ const Login = () => {
             <button
               type="button"
               onClick={() => navigate("/forgot-password")}
-              className="text-blue-700 hover:text-blue-900 underline"
+              className="text-[#f86730] hover:text-[#e35d1f] underline"
             >
               Forgot password?
             </button>
@@ -85,17 +85,17 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-[#f86730] text-white py-3 rounded-lg hover:bg-[#e35d1f] transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
           {/* Error Message */}
           {error && (
-            <p className="text-red-500 text-center text-sm mt-2">{error}</p>
+            <p className="text-[#EF4444] text-center text-sm mt-2">{error}</p>
           )}
         </form>
 
-        <p className="text-center text-gray-500 text-sm mt-6">
+        <p className="text-center text-[#64748B] text-sm mt-6">
           © {new Date().getFullYear()} Aaplishala Library
         </p>
       </div>

@@ -192,7 +192,7 @@ const ConstantSelectors = ({
                     </div>
 
                     {/* Student list */}
-                    <div className="max-h-64 overflow-y-auto border rounded-md">
+                    <div className="border rounded-md">
                         {loading.student ? (
                             <p className="text-gray-500 p-3 text-sm">Loading students...</p>
                         ) : students.length === 0 ? (

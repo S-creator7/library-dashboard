@@ -1,7 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
 import { getAllFines, updateFine } from "../services/fineService";
 import Pagination from "../components/Pagination";
-import { FaCheck, FaTimes, FaEdit } from "react-icons/fa";
+import {
+  FaCheck,
+  FaTimes,
+  FaEdit,
+  FaSearch,
+  FaFilter,
+  FaSpinner,
+  FaMoneyBillWave,
+  FaUser,
+  FaBook,
+  FaCalendarAlt,
+  FaSave,
+  FaUndo
+} from "react-icons/fa";
 import { toast } from "react-toastify";
 
 const Fines = () => {
@@ -17,11 +30,9 @@ const Fines = () => {
   const [totalPages, setTotalPages] = useState(1);
   const searchTimeout = useRef(null);
 
-  // Track which row is being edited
   const [editingRow, setEditingRow] = useState(null);
   const [editData, setEditData] = useState({ fine_status: "", remarks: "" });
 
-  // Fetch fines
   const loadFines = async () => {
     setLoading(true);
     try {
@@ -52,7 +63,6 @@ const Fines = () => {
     loadFines();
   }, [filters.fine_status, page, limit]);
 
-  // Start editing a fine
   const handleEdit = (fine) => {
     setEditingRow(fine.fine_id);
     setEditData({
@@ -61,13 +71,11 @@ const Fines = () => {
     });
   };
 
-  // Cancel edit
   const handleCancel = () => {
     setEditingRow(null);
     setEditData({ fine_status: "", remarks: "" });
   };
 
-  // Save update
   const handleSave = async (fine) => {
     const fine_paid_date =
       editData.fine_status === "Paid"
@@ -90,185 +98,228 @@ const Fines = () => {
     }
   };
 
+  const getStatusBadge = (status) => {
+    const configs = {
+      'Paid': 'bg-green-50 text-[#22C55E] border-green-200',
+      'Pending': 'bg-amber-50 text-amber-600 border-amber-200',
+      'Waived': 'bg-gray-50 text-gray-600 border-gray-200'
+    };
+    return configs[status] || 'bg-gray-50 text-gray-600 border-gray-200';
+  };
+
   return (
-    <div>
-      {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-lg shadow">
-        <input
-          type="text"
-          placeholder="Search..."
-          value={filters.search}
-          onChange={(e) =>
-            setFilters((f) => ({ ...f, search: e.target.value }))
-          }
-          className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-gray-900"
-        />
-        <select
-          value={filters.fine_status}
-          onChange={(e) =>
-            setFilters((f) => ({ ...f, fine_status: e.target.value }))
-          }
-          className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-gray-900"
-        >
-          <option value="">All</option>
-          <option value="Pending">Pending</option>
-          <option value="Paid">Paid</option>
-          <option value="Waived">Waived</option>
-        </select>
-      </div>
-
-      {/* Fines Table */}
-      {loading ? (
-        <p className="text-gray-500 text-center mt-6">Loading...</p>
-      ) : fines.length === 0 ? (
-        <p className="text-gray-500 text-center mt-6">No fines found.</p>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-x-auto mt-4">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                  Book Title
-                </th>
-                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                  Student
-                </th>
-                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                  Class
-                </th>
-                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                  Roll
-                </th>
-                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                  Fine Amount
-                </th>
-                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                  Reason
-                </th>
-                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                  Due Date
-                </th>
-                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                  Status
-                </th>
-                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                  Remarks
-                </th>
-                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {fines.map((fine) => {
-                const isEditing = editingRow === fine.fine_id;
-                return (
-                  <tr key={fine.fine_id}>
-                    <td className="px-4 py-2 text-sm">{fine.book_title}</td>
-                    <td className="px-4 py-2 text-sm">{fine.student_name}</td>
-                    <td className="px-4 py-2 text-sm">{`${fine.class_name} ${fine.section_name || ""}`}</td>
-                    <td className="px-4 py-2 text-sm">{fine.roll_number || "-"}</td>
-                    <td className="px-4 py-2 text-sm">₹{fine.fine_amount}</td>
-                    <td className="px-4 py-2 text-sm">{fine.reason_name}</td>
-                    <td className="px-4 py-2 text-sm">{fine.fine_due_date}</td>
-
-                    <td className="px-4 py-2 text-sm">
-                      {isEditing ? (
-                        <select
-                          value={editData.fine_status}
-                          onChange={(e) =>
-                            setEditData((prev) => ({
-                              ...prev,
-                              fine_status: e.target.value,
-                            }))
-                          }
-                          className="border border-gray-300 rounded-lg px-2 py-1"
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="Paid">Paid</option>
-                          <option value="Waived">Waived</option>
-                        </select>
-                      ) : (
-                        <span
-                          className={`font-semibold ${
-                            fine.fine_status === "Paid"
-                              ? "text-green-600"
-                              : fine.fine_status === "Pending"
-                              ? "text-yellow-600"
-                              : "text-gray-500"
-                          }`}
-                        >
-                          {fine.fine_status}
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="px-4 py-2 text-sm">
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          value={editData.remarks}
-                          onChange={(e) =>
-                            setEditData((prev) => ({
-                              ...prev,
-                              remarks: e.target.value,
-                            }))
-                          }
-                          className="border border-gray-300 rounded-lg px-2 py-1 w-full"
-                          placeholder="Remarks..."
-                        />
-                      ) : (
-                        fine.remarks || "-"
-                      )}
-                    </td>
-
-                    <td className="px-4 py-2 text-sm">
-                      {isEditing ? (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleSave(fine)}
-                            className="text-green-600 hover:text-green-800"
-                            title="Save"
-                          >
-                            <FaCheck />
-                          </button>
-                          <button
-                            onClick={handleCancel}
-                            className="text-red-600 hover:text-red-800"
-                            title="Cancel"
-                          >
-                            <FaTimes />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => handleEdit(fine)}
-                          className="text-blue-600 hover:text-blue-800"
-                          title="Edit"
-                        >
-                          <FaEdit />
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-
-          {/* Pagination */}
-          <Pagination
-            currentPage={page}
-            totalPages={totalPages}
-            limit={limit}
-            onPageChange={setPage}
-            onLimitChange={(newLimit) => {
-              setLimit(newLimit);
-              setPage(1);
-            }}
-          />
+    <div className="p-4 sm:p-6 bg-[#F8FAFC] min-h-screen">
+      <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] overflow-hidden">
+        {/* Header */}
+        <div className="px-5 py-4 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+          <h1 className="text-lg sm:text-xl font-bold text-[#0F172A] flex items-center gap-2">
+            <FaMoneyBillWave className="text-[#f86730]" />
+            Fines
+          </h1>
+          <p className="text-sm text-[#64748B] mt-0.5">
+            Manage and track library fines
+          </p>
         </div>
-      )}
+
+        {/* Filters */}
+        <div className="p-4 border-b border-[#E2E8F0] bg-white">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1 relative">
+              <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] text-sm" />
+              <input
+                type="text"
+                placeholder="Search by student or book..."
+                value={filters.search}
+                onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
+                className="w-full pl-10 pr-4 py-2.5 border border-[#E2E8F0] rounded-xl text-sm text-[#0F172A] bg-white focus:outline-none focus:ring-2 focus:ring-[#f86730]/40 focus:border-[#f86730] transition-all duration-150 placeholder:text-[#94A3B8]"
+              />
+            </div>
+            <div className="relative sm:w-48">
+              <FaFilter className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] text-sm" />
+              <select
+                value={filters.fine_status}
+                onChange={(e) => setFilters((f) => ({ ...f, fine_status: e.target.value }))}
+                className="w-full pl-10 pr-8 py-2.5 border border-[#E2E8F0] rounded-xl text-sm text-[#0F172A] bg-white focus:outline-none focus:ring-2 focus:ring-[#f86730]/40 focus:border-[#f86730] transition-all duration-150"
+              >
+                <option value="">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Paid">Paid</option>
+                <option value="Waived">Waived</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Fines Table */}
+        <div className="p-4">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <FaSpinner className="animate-spin text-[#f86730] text-2xl mr-3" />
+              <p className="text-[#64748B]">Loading fines...</p>
+            </div>
+          ) : fines.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 rounded-full bg-[#F8FAFC] flex items-center justify-center mx-auto mb-4">
+                <FaMoneyBillWave className="text-4xl text-[#94A3B8]" />
+              </div>
+              <p className="text-base font-medium text-[#0F172A]">No fines found</p>
+              <p className="text-sm text-[#64748B] mt-1">
+                {filters.search || filters.fine_status ? "Try adjusting your filters" : "All fines are cleared"}
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto rounded-xl border border-[#E2E8F0]">
+                <table className="min-w-full table-fixed divide-y divide-[#E2E8F0]">
+                  <thead className="bg-[#F8FAFC]">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#0F172A] uppercase tracking-wider">
+                        <FaBook className="inline mr-1.5 text-[#64748B] text-[10px]" />
+                        Book
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#0F172A] uppercase tracking-wider">
+                        <FaUser className="inline mr-1.5 text-[#64748B] text-[10px]" />
+                        Student
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#0F172A] uppercase tracking-wider">
+                        Class
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#0F172A] uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#0F172A] uppercase tracking-wider">
+                        Reason
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#0F172A] uppercase tracking-wider">
+                        <FaCalendarAlt className="inline mr-1.5 text-[#64748B] text-[10px]" />
+                        Due Date
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#0F172A] uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#0F172A] uppercase tracking-wider">
+                        Remarks
+                      </th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-[#0F172A] uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#E2E8F0] bg-white">
+                    {fines.map((fine) => {
+                      const isEditing = editingRow === fine.fine_id;
+                      return (
+                        <tr key={fine.fine_id} className="hover:bg-[#F8FAFC] transition-colors duration-150">
+                          <td className="px-4 py-3 text-sm text-[#64748B] whitespace-nowrap">
+                            {fine.fine_due_date}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-[#64748B]">
+                            {fine.student_name}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-[#64748B]">
+                            {`${fine.class_name} ${fine.section_name || ""}`}
+                          </td>
+                          <td className="px-4 py-3 text-sm font-semibold text-[#0F172A]">
+                            ₹{fine.fine_amount}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-[#64748B]">
+                            {fine.reason_name}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-[#64748B]">
+                            {fine.fine_due_date}
+                          </td>
+                          <td className="px-4 py-3">
+                            {isEditing ? (
+                              <select
+                                value={editData.fine_status}
+                                onChange={(e) =>
+                                  setEditData((prev) => ({
+                                    ...prev,
+                                    fine_status: e.target.value,
+                                  }))
+                                }
+                                className="w-full px-3 py-1.5 border border-[#E2E8F0] rounded-lg text-sm text-[#0F172A] bg-white focus:outline-none focus:ring-2 focus:ring-[#f86730]/40 focus:border-[#f86730] transition-all duration-150"
+                              >
+                                <option value="Pending">Pending</option>
+                                <option value="Paid">Paid</option>
+                                <option value="Waived">Waived</option>
+                              </select>
+                            ) : (
+                              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadge(fine.fine_status)}`}>
+                                {fine.fine_status}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-[#64748B]">
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                value={editData.remarks}
+                                onChange={(e) =>
+                                  setEditData((prev) => ({
+                                    ...prev,
+                                    remarks: e.target.value,
+                                  }))
+                                }
+                                className="w-full px-3 py-1.5 border border-[#E2E8F0] rounded-lg text-sm text-[#0F172A] bg-white focus:outline-none focus:ring-2 focus:ring-[#f86730]/40 focus:border-[#f86730] transition-all duration-150"
+                                placeholder="Remarks..."
+                              />
+                            ) : (
+                              fine.remarks || "-"
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            {isEditing ? (
+                              <div className="flex items-center justify-center gap-2">
+                                <button
+                                  onClick={() => handleSave(fine)}
+                                  className="p-1.5 rounded-lg bg-green-50 text-[#22C55E] hover:bg-green-100 transition-all duration-150"
+                                  title="Save"
+                                >
+                                  <FaSave className="text-sm" />
+                                </button>
+                                <button
+                                  onClick={handleCancel}
+                                  className="p-1.5 rounded-lg bg-red-50 text-[#EF4444] hover:bg-red-100 transition-all duration-150"
+                                  title="Cancel"
+                                >
+                                  <FaTimes className="text-sm" />
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => handleEdit(fine)}
+                                className="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all duration-150"
+                                title="Edit"
+                              >
+                                <FaEdit className="text-sm" />
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="mt-6 pt-4 border-t border-[#E2E8F0]">
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  limit={limit}
+                  onPageChange={setPage}
+                  onLimitChange={(newLimit) => {
+                    setLimit(newLimit);
+                    setPage(1);
+                  }}
+                />
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,4 +1,12 @@
 import React, { useRef } from "react";
+import { 
+  FaTimes, 
+  FaDownload, 
+  FaUpload, 
+  FaFileExcel, 
+  FaInfoCircle,
+  FaSpinner
+} from "react-icons/fa";
 
 const BooksBulkUploadModal = ({
   isOpen,
@@ -33,58 +41,78 @@ const BooksBulkUploadModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-transparent backdrop-blur-[2px]">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 p-6 relative">
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#0F172A]/60 backdrop-blur-sm p-4 animate-fadeIn">
+      <div className="bg-white rounded-2xl shadow-2xl shadow-black/25 w-full max-w-2xl border border-[#E2E8F0] animate-slideUp">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Bulk Upload Books</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] rounded-t-2xl">
+          <h2 className="text-lg font-bold text-[#0F172A] flex items-center gap-2">
+            <FaFileExcel className="text-[#f86730]" />
+            Bulk Upload Books
+          </h2>
           <div className="flex items-center gap-2">
             <a
               href={templateUrl}
               download
-              className="inline-flex items-center gap-2 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+              className="inline-flex items-center gap-2 bg-[#0F172A] text-white text-xs font-medium px-3 py-2 rounded-lg hover:bg-[#1E293B] transition-all duration-150"
             >
-              <span className="text-sm font-semibold">⇩</span>
-              <span>Download Template</span>
+              <FaDownload className="text-sm" />
+              <span>Template</span>
             </a>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-800 transition-colors text-3xl leading-none flex items-center justify-center"
+              className="text-[#64748B] hover:text-[#0F172A] transition-colors hover:bg-slate-100 rounded-lg w-8 h-8 flex items-center justify-center"
               aria-label="Close"
             >
-              &times;
+              <FaTimes className="text-lg" />
             </button>
           </div>
         </div>
 
         {/* Instructions */}
-        <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-4">
-          <h3 className="text-sm font-medium text-blue-900 mb-2">
-            Bulk Upload Books Instructions:
-          </h3>
-          <ul className="list-disc list-inside text-xs text-blue-900 space-y-1">
-            <li>Download the template to ensure proper formatting.</li>
-            <li>
-              Fill in book information following the template structure
-              (title, author, publisher, year_of_publication, category,
-              isbn_number, description, quantity).
-            </li>
-            <li>Upload the completed file to add multiple books at once.</li>
-          </ul>
+        <div className="mx-6 mt-4 mb-4 p-4 bg-orange-50 border border-orange-200 rounded-xl">
+          <div className="flex items-start gap-2">
+            <FaInfoCircle className="text-orange-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <h3 className="text-sm font-semibold text-orange-800 mb-1.5">
+                Bulk Upload Books Instructions:
+              </h3>
+              <ul className="list-disc list-inside text-xs text-orange-700 space-y-1">
+                <li>Download the template to ensure proper formatting.</li>
+                <li>
+                  Fill in book information following the template structure
+                  (title, author, publisher, year_of_publication, category,
+                  isbn_number, description, quantity).
+                </li>
+                <li>Upload the completed file to add multiple books at once.</li>
+              </ul>
+            </div>
+          </div>
         </div>
 
         {/* Upload Area */}
         <div
-          className="border-2 border-dashed border-gray-300 rounded-lg py-10 px-4 flex flex-col items-center justify-center text-center cursor-pointer hover:border-gray-400 transition-colors"
+          className={`mx-6 border-2 border-dashed rounded-xl py-12 px-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 ${
+            uploading 
+              ? "border-[#94A3B8] bg-[#F8FAFC]" 
+              : "border-[#E2E8F0] hover:border-[#f86730]/60 hover:bg-orange-50/30"
+          }`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => !uploading && fileInputRef.current?.click()}
         >
-          <div className="text-4xl mb-2 text-gray-400">↑</div>
-          <p className="text-sm text-gray-700 mb-1">
-            Click to upload a file or drag and drop
+          <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${
+            uploading ? "bg-[#F8FAFC]" : "bg-[#f86730]/10"
+          }`}>
+            {uploading ? (
+              <FaSpinner className="text-2xl text-[#f86730] animate-spin" />
+            ) : (
+              <FaUpload className="text-2xl text-[#f86730]" />
+            )}
+          </div>
+          <p className="text-sm font-medium text-[#0F172A] mb-1">
+            {uploading ? "Uploading..." : "Click to upload a file or drag and drop"}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-[#64748B]">
             Supported formats: .xlsx, .xls, .csv
           </p>
           <input
@@ -98,15 +126,50 @@ const BooksBulkUploadModal = ({
         </div>
 
         {/* Error / Status */}
-        <div className="mt-4 flex items-center justify-between text-xs">
-          <div className="text-red-600 min-h-[1.25rem]">
-            {error && <span>{error}</span>}
+        <div className="px-6 pb-4 pt-2 flex items-center justify-between text-xs">
+          <div className="text-[#EF4444] min-h-[1.25rem] font-medium">
+            {error && (
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#EF4444]"></span>
+                {error}
+              </span>
+            )}
           </div>
-          <div className="text-gray-600">
-            {uploading ? "Uploading books..." : "Ready to upload"}
+          <div className="text-[#64748B] font-medium">
+            {uploading ? (
+              <span className="flex items-center gap-1.5">
+                <FaSpinner className="animate-spin text-[#f86730]" />
+                Uploading books...
+              </span>
+            ) : (
+              "Ready to upload"
+            )}
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.15s ease-out;
+        }
+        .animate-slideUp {
+          animation: slideUp 0.25s ease-out;
+        }
+      `}</style>
     </div>
   );
 };
