@@ -72,18 +72,18 @@ const Profile = () => {
         }
     };
 
-    if (loading) return <p className="text-center mt-10 text-gray-500">Loading...</p>;
-    if (!profile) return <p>No profile data found.</p>;
+    if (loading) return <p className="text-center mt-10 text-[#64748B]">Loading...</p>;
+    if (!profile) return <p className="text-center mt-10 text-[#64748B]">No profile data found.</p>;
 
     const coverImage = profile?.user_assets?.cover?.[0];
     const profileImage = profile?.user_assets?.profile?.[0];
 
     return (
-        <div className="max-w-5xl mx-auto p-4">
+        <div className="max-w-5xl mx-auto p-4 bg-[#F8FAFC] min-h-screen">
 
             {/* ------ COVER + PROFILE IMAGE ------ */}
             <div className="relative w-full">
-                
+
                 {/* Cover */}
                 {coverImage ? (
                     <img
@@ -92,7 +92,7 @@ const Profile = () => {
                         className="w-full h-48 object-cover rounded-xl shadow"
                     />
                 ) : (
-                    <div className="w-full h-48 bg-gray-200 rounded-xl flex items-center justify-center text-gray-500">
+                    <div className="w-full h-48 bg-[#F8FAFC] rounded-xl flex items-center justify-center text-[#94A3B8] border border-[#E2E8F0]">
                         No Cover Image
                     </div>
                 )}
@@ -105,7 +105,7 @@ const Profile = () => {
                         className="w-32 h-32 rounded-full border-4 border-white shadow-lg absolute -bottom-12 left-6 object-cover"
                     />
                 ) : (
-                    <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg absolute -bottom-12 left-6 bg-gray-300 flex items-center justify-center text-gray-600">
+                    <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg absolute -bottom-12 left-6 bg-[#F8FAFC] flex items-center justify-center text-[#94A3B8] border border-[#E2E8F0]">
                         No Image
                     </div>
                 )}
@@ -113,34 +113,34 @@ const Profile = () => {
 
             {/* ------ BASIC INFO ------ */}
             <div className="mt-16 px-2">
-                <h2 className="text-2xl font-bold">
+                <h2 className="text-2xl font-bold text-[#0F172A]">
                     {profile.first_name} {profile.last_name}
                 </h2>
-                <p className="text-gray-600">{profile.role_name}</p>
+                <p className="text-[#f86730] font-medium">{profile.role_name}</p>
             </div>
 
             {/* ------ USER INFO GRID ------ */}
-            <div className="mt-6 grid md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <p><strong>Email:</strong> {profile.email}</p>
-                <p><strong>Phone:</strong> {profile.phone_number}</p>
-                <p><strong>Gender:</strong> {profile.gender}</p>
-                <p><strong>DOB:</strong> {profile.dob}</p>
-                <p><strong>Department:</strong> {profile.department}</p>
-                <p><strong>Designation:</strong> {profile.designation}</p>
+            <div className="mt-6 grid md:grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-[#E2E8F0]">
+                <p className="text-[#0F172A]"><strong>Email:</strong> {profile.email}</p>
+                <p className="text-[#0F172A]"><strong>Phone:</strong> {profile.phone_number}</p>
+                <p className="text-[#0F172A]"><strong>Gender:</strong> {profile.gender}</p>
+                <p className="text-[#0F172A]"><strong>DOB:</strong> {profile.dob || "N/A"}</p>
+                <p className="text-[#0F172A]"><strong>Department:</strong> {profile.department}</p>
+                <p className="text-[#0F172A]"><strong>Designation:</strong> {profile.designation}</p>
 
-                <p className="md:col-span-2"><strong>Address:</strong> {profile.address}</p>
+                <p className="md:col-span-2 text-[#0F172A]"><strong>Address:</strong> {profile.address}</p>
 
-                <p className="md:col-span-2">
+                <p className="md:col-span-2 text-[#0F172A]">
                     <strong>Account Created At:</strong> {formatDateTime(profile.created_at)}
                 </p>
             </div>
 
             {/* ------ USER ASSETS ------ */}
-            <div className="mt-8 bg-white shadow-md rounded-xl p-6">
-                <h3 className="text-xl font-semibold mb-4">User Assets</h3>
+            <div className="mt-4 bg-white shadow-md rounded-xl p-6 border border-[#E2E8F0]">
+                <h3 className="text-xl font-semibold mb-4 text-[#0F172A]">User Assets</h3>
 
                 <div>
-                    <strong className="block mb-2">Documents:</strong>
+                    <strong className="block mb-2 text-[#0F172A]">Documents:</strong>
 
                     {profile?.user_assets?.documents?.length > 0 ? (
                         <ul className="list-disc ml-6">
@@ -150,7 +150,7 @@ const Profile = () => {
                                         href={url}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="text-blue-600 hover:underline"
+                                        className="text-[#f86730] hover:underline"
                                     >
                                         Document {i + 1}
                                     </a>
@@ -158,42 +158,42 @@ const Profile = () => {
                             ))}
                         </ul>
                     ) : (
-                        <p className="text-gray-500">No documents available</p>
+                        <p className="text-[#64748B]">No documents available</p>
                     )}
                 </div>
             </div>
 
             {/* ------ QUALIFICATIONS ------ */}
-            <div className="mt-8 bg-white shadow-md rounded-xl p-6">
-                <h3 className="text-xl font-semibold mb-4">Qualifications</h3>
+            <div className="mt-8 bg-white shadow-md rounded-xl p-6 border border-[#E2E8F0]">
+                <h3 className="text-xl font-semibold mb-4 text-[#0F172A]">Qualifications</h3>
 
                 {profile?.qualificationsDetail?.length > 0 ? (
                     profile.qualificationsDetail.map((q, i) => (
                         <div
                             key={i}
-                            className="border border-gray-200 rounded-lg p-4 mb-3 bg-gray-50"
+                            className="border border-[#E2E8F0] rounded-lg p-4 mb-3 bg-[#F8FAFC]"
                         >
-                            <p><strong>Qualification:</strong> {q.qualification}</p>
-                            <p><strong>Institute:</strong> {q.institute}</p>
-                            <p><strong>Year of Passing:</strong> {q.year_of_passing}</p>
+                            <p className="text-[#0F172A]"><strong>Qualification:</strong> {q.qualification}</p>
+                            <p className="text-[#0F172A]"><strong>Institute:</strong> {q.institute}</p>
+                            <p className="text-[#0F172A]"><strong>Year of Passing:</strong> {q.year_of_passing}</p>
                         </div>
                     ))
                 ) : (
-                    <p>No qualifications available.</p>
+                    <p className="text-[#64748B]">No qualifications available.</p>
                 )}
             </div>
 
             {/* ------ SCHOOL DETAILS (NO IDs) ------ */}
-            <div className="mt-8 bg-white shadow-md rounded-xl p-6">
-                <h3 className="text-xl font-semibold mb-4">School Details</h3>
+            <div className="mt-8 bg-white shadow-md rounded-xl p-6 border border-[#E2E8F0]">
+                <h3 className="text-xl font-semibold mb-4 text-[#0F172A]">School Details</h3>
 
                 <div className="grid md:grid-cols-2 gap-3">
                     {Object.entries(profile.schoolDetail)
-                        .filter(([key]) => !key.toLowerCase().includes("id")) // remove any ID field
+                        .filter(([key]) => !key.toLowerCase().includes("id"))
                         .map(([key, value]) => (
                             <p
                                 key={key}
-                                className={key === "address" || key === "website" ? "md:col-span-2" : ""}
+                                className={key === "address" || key === "website" ? "md:col-span-2 text-[#0F172A]" : "text-[#0F172A]"}
                             >
                                 <strong className="capitalize">{key.replace(/_/g, " ")}:</strong>{" "}
                                 {value || "N/A"}
@@ -203,17 +203,17 @@ const Profile = () => {
             </div>
 
             {/* ------ ATTENDANCE ------ */}
-            <div className="mt-8 bg-white shadow-md rounded-xl p-6 mb-10">
-                <h3 className="text-xl font-semibold mb-4">Today's Attendance</h3>
+            <div className="mt-8 bg-white shadow-md rounded-xl p-6 border border-[#E2E8F0]">
+                <h3 className="text-xl font-semibold mb-4 text-[#0F172A]">Today's Attendance</h3>
 
-                <p><strong>Marked:</strong> {profile.today_attendance.is_attendance_marked ? "Yes" : "No"}</p>
-                <p><strong>Status:</strong> {profile.today_attendance.status || "N/A"}</p>
-                <p><strong>In Time:</strong> {profile.today_attendance.in_time || "—"}</p>
-                <p><strong>Out Time:</strong> {profile.today_attendance.out_time || "—"}</p>
+                <p className="text-[#0F172A]"><strong>Marked:</strong> {profile.today_attendance.is_attendance_marked ? "Yes" : "No"}</p>
+                <p className="text-[#0F172A]"><strong>Status:</strong> {profile.today_attendance.status || "N/A"}</p>
+                <p className="text-[#0F172A]"><strong>In Time:</strong> {profile.today_attendance.in_time || "—"}</p>
+                <p className="text-[#0F172A]"><strong>Out Time:</strong> {profile.today_attendance.out_time || "—"}</p>
             </div>
 
-            <div className="mt-8 bg-white shadow-md rounded-xl p-6 mb-10">
-                <h3 className="text-xl font-semibold mb-4">Change Password</h3>
+            <div className="mt-8 bg-white shadow-md rounded-xl p-6 mb-10 border border-[#E2E8F0]">
+                <h3 className="text-xl font-semibold mb-4 text-[#0F172A]">Change Password</h3>
                 <form onSubmit={handlePasswordChange} className="space-y-4 max-w-xl">
                     <input
                         type="password"
@@ -221,7 +221,7 @@ const Profile = () => {
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                        className="w-full px-4 py-3 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f86730] focus:border-[#f86730]"
                     />
                     <input
                         type="password"
@@ -230,7 +230,7 @@ const Profile = () => {
                         onChange={(e) => setNewPassword(e.target.value)}
                         required
                         minLength={8}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                        className="w-full px-4 py-3 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f86730] focus:border-[#f86730]"
                     />
                     <input
                         type="password"
@@ -239,20 +239,20 @@ const Profile = () => {
                         onChange={(e) => setConfirmNewPassword(e.target.value)}
                         required
                         minLength={8}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                        className="w-full px-4 py-3 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f86730] focus:border-[#f86730]"
                     />
                     <button
                         type="submit"
                         disabled={passwordLoading}
-                        className="bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="bg-[#f86730] text-white px-6 py-3 rounded-lg hover:bg-[#e35d1f] transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                         {passwordLoading ? "Updating..." : "Update Password"}
                     </button>
                     {passwordMessage && (
-                        <p className="text-green-600 text-sm">{passwordMessage}</p>
+                        <p className="text-[#22C55E] text-sm">{passwordMessage}</p>
                     )}
                     {passwordError && (
-                        <p className="text-red-500 text-sm">{passwordError}</p>
+                        <p className="text-[#EF4444] text-sm">{passwordError}</p>
                     )}
                 </form>
             </div>
