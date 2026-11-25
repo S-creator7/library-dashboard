@@ -15,9 +15,9 @@ const Sidebar = ({ isOpen }) => {
 
   return (
     <aside
-      className={`bg-gray-900 text-white transition-all duration-300
-      ${isOpen ? "w-64" : "w-16"}
-      flex flex-col h-[calc(100vh-3rem)] mt-12 fixed md:relative`}
+      className={`bg-[#0F172A] text-white transition-all duration-300
+      ${isOpen ? "w-64 sm:w-56" : "w-16 sm:w-14"}
+      flex flex-col h-[calc(100vh-3rem)] mt-12 fixed md:relative border-r border-slate-700/50`}
     >
       {/* Menu (scrollable) */}
       <nav className="flex-1 overflow-y-auto mt-5">
@@ -29,7 +29,7 @@ const Sidebar = ({ isOpen }) => {
                 <Link
                   to={item.path}
                   className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-300
-                  ${isActive ? "bg-blue-600 text-white" : "hover:bg-gray-700"}`}
+                  ${isActive ? "bg-[#f86730] text-white" : "hover:bg-slate-800"}`}
                 >
                   <item.icon
                     className={`text-lg ${isActive ? "text-white" : "text-gray-300"
@@ -48,11 +48,11 @@ const Sidebar = ({ isOpen }) => {
       </nav>
 
       {/* Footer Branding (always stuck at bottom) */}
-      <footer className="p-3 text-center text-white border-t border-gray-700">
+      <footer className="p-3 text-center text-white border-t border-slate-700/50">
         {isOpen && (
           <>
-            <p className="font-semibold">Aaplishala</p>
-            <p className="text-gray-400 text-sm">
+            <p className="font-semibold text-[#f86730]">Aaplishala</p>
+            <p className="text-slate-400 text-sm">
               © {new Date().getFullYear()} All rights reserved.
             </p>
           </>
